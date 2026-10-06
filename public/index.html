@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⭐ StarConnect</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --bg-color: #0f0f13; --card-bg: #1a1a24; --text-main: #ffffff; --text-muted: #a0a0b0; --border-color: #2a2a35; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); overflow-x: hidden; }
+
+        .neon-text { background: linear-gradient(90deg, #ff00ff, #00ffff, #ff00ff); background-size: 200% auto; color: transparent; -webkit-background-clip: text; background-clip: text; animation: shine 3s linear infinite; }
+        @keyframes shine { to { background-position: 200% center; } }
+        .neon-border { border: 1px solid transparent; border-image: linear-gradient(90deg, #ff00ff, #00ffff) 1; box-shadow: 0 0 10px rgba(255, 0, 255, 0.2), 0 0 10px rgba(0, 255, 255, 0.2); }
+        .neon-btn { background: linear-gradient(90deg, #ff00ff, #00ffff); color: #000; border: none; padding: 0.6rem 1.2rem; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+        .neon-btn:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 0, 255, 0.8); }
+
+        .dynamic-bg { background: radial-gradient(circle at center, #1a1a2e 0%, #0f0f13 100%); display: flex; justify-content: center; align-items: center; height: 100vh; position: fixed; width: 100%; z-index: 1000; }
+        .auth-box { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; width: 350px; text-align: center; }
+        .auth-tabs { display: flex; justify-content: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); }
+        .auth-tab { background: none; border: none; font-size: 1rem; font-weight: 600; color: var(--text-muted); cursor: pointer; padding: 0.5rem 1rem; }
+        .auth-tab.active { color: var(--text-main); border-bottom: 2px solid #00ffff; }
+        .auth-form { display: none; flex-direction: column; gap: 0.8rem; }
+        .auth-form.active { display: flex; }
+        .insta-input { width: 100%; padding: 10px; background: #0f0f13; color: white; border: 1px solid var(--border-color); border-radius: 6px; outline: none; margin-bottom: 10px; }
+
+        .left-sidebar { width: 250px; border-right: 1px solid var(--border-color); padding: 1.5rem 1rem; position: fixed; left: 0; top: 0; height: 100vh; background: var(--bg-color); z-index: 50; }
+        .right-sidebar { width: 300px; padding: 2rem 1rem; position: fixed; right: 0; top: 0; height: 100vh; background: var(--bg-color); border-left: 1px solid var(--border-color); z-index: 50; }
+        .main-content { margin-left: 260px; margin-right: 310px; max-width: 600px; width: auto; padding: 2rem 1rem; margin-left: auto; margin-right: auto; }
+        
+        .nav-links { display: flex; flex-direction: column; gap: 0.5rem; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); padding: 0.8rem; border-radius: 8px; font-weight: 500; font-size: 1.1rem; display: flex; align-items: center; gap: 1rem; transition: 0.3s; cursor: pointer; }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-main); background: rgba(255, 255, 255, 0.05); box-shadow: inset 2px 0 0 #00ffff; }
+        .btn-outline { background: transparent; color: #ff00ff; border: 1px solid #ff00ff; padding: 0.5rem; border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; margin-top: 20px;}
+
+        .view-section { display: none; animation: fadeIn 0.3s ease; width: 100%; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .create-post-box { background: var(--card-bg); border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; }
+        .post-input-wrapper { display: flex; gap: 1rem; align-items: center; }
+        .avatar-placeholder { width: 45px; height: 45px; background: linear-gradient(45deg, #ff00ff, #00ffff); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; cursor: pointer;}
+        textarea { flex: 1; border: none; resize: none; outline: none; font-size: 1rem; background: transparent; color: white; height: 45px; padding-top: 10px; }
+        .post-actions-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 0.8rem; margin-top: 10px; }
+        .icon-btn { background: none; border: none; cursor: pointer; font-size: 0.95rem; font-weight: 600; color: #00ffff; display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; }
+
+        .insta-post { background: var(--card-bg); border-radius: 12px; padding-bottom: 1rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        .post-header { display: flex; gap: 0.8rem; align-items: center; padding: 1rem; cursor: pointer; }
+        .post-author { font-weight: 600; color: #ff00ff; transition: 0.2s; }
+        .media-container { width: 100%; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); background: #000; display: flex; justify-content: center;}
+        .media-container img, .media-container video { max-width: 100%; max-height: 500px; object-fit: contain; }
+        .post-actions { display: flex; padding: 0.8rem 1rem 0.5rem; gap: 1rem; }
+        .post-actions i { font-size: 1.5rem; cursor: pointer; transition: 0.2s; color: var(--text-main); }
+        .post-actions i:hover { color: #ff00ff; text-shadow: 0 0 10px #ff00ff; }
+        .likes-count { font-weight: 600; font-size: 0.95rem; padding: 0 1rem; margin-bottom: 0.3rem; }
+        .comments-section { padding: 0 1rem; display: flex; flex-direction: column; gap: 0.4rem; }
+        .comment { font-size: 0.9rem; background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-bottom: 5px; }
+        .add-comment { display: flex; gap: 0.5rem; border-top: 1px solid var(--border-color); padding: 0.8rem 1rem 0; margin-top: 0.5rem;}
+        .add-comment input { width: 100%; border: none; outline: none; font-size: 0.9rem; background: transparent; color: white; padding: 5px; }
+        .add-comment button { background: none; color: #00ffff; border: none; font-weight: 600; cursor: pointer; }
+
+        .empty-state { text-align: center; padding: 2rem; color: var(--text-muted); font-style: italic; }
+        .clickable-user { cursor: pointer; transition: 0.2s; }
+        .clickable-user:hover { background: rgba(255,255,255,0.05); }
+
+        .profile-stats { display: flex; gap: 20px; margin-top: 10px; color: var(--text-muted); font-size: 0.9rem; }
+        .profile-stats span strong { color: white; font-size: 1.1rem; }
+
+        .search-bar { width: 100%; padding: 15px; background: var(--card-bg); border: 1px solid #00ffff; border-radius: 30px; color: white; margin-bottom: 20px; font-size: 1rem; outline: none; box-shadow: 0 0 10px rgba(0,255,255,0.2); }
+        
+        .chat-container { display: flex; flex-direction: column; height: 70vh; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+        .chat-header { padding: 15px; border-bottom: 1px solid var(--border-color); font-weight: bold; color: #00ffff; }
+        .chat-box { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg-bubble { max-width: 70%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; letter-spacing: 0.3px; line-height: 1.4; word-wrap: break-word;}
+        .msg-received { background: #2a2a35; color: #ffffff; align-self: flex-start; border-bottom-left-radius: 5px; font-weight: 500; border: 1px solid #444; }
+        .msg-sent { background: #005f73; color: #ffffff; align-self: flex-end; border-bottom-right-radius: 5px; font-weight: 500; border: 1px solid #0a9396;}
+        .chat-input-area { padding: 10px; border-top: 1px solid var(--border-color); display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+
+    <!-- AUTH PAGE -->
+    <div id="auth-page" class="dynamic-bg">
+        <div class="auth-box neon-border">
+            <h1 class="neon-text" style="font-size: 2.2rem; margin-bottom: 20px;">⭐ StarConnect</h1>
+            <div class="auth-tabs">
+                <button type="button" id="tab-login" class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+                <button type="button" id="tab-register" class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+            </div>
+            <div id="login-form" class="auth-form active">
+                <input type="text" id="login-username" class="insta-input" placeholder="Username">
+                <input type="password" id="login-password" class="insta-input" placeholder="Password">
+                <button type="button" class="neon-btn" onclick="login()">Enter Matrix</button>
+            </div>
+            <div id="register-form" class="auth-form">
+                <input type="text" id="reg-name" class="insta-input" placeholder="Full Name">
+                <input type="text" id="reg-user" class="insta-input" placeholder="Username">
+                <input type="password" id="reg-pass" class="insta-input" placeholder="Password">
+                <button type="button" class="neon-btn" onclick="register()">Create ID</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app" style="display: none;">
+        
+        <!-- LEFT SIDEBAR -->
+        <aside class="left-sidebar">
+            <div class="nav-links">
+                <div class="neon-text" style="font-size: 1.8rem; font-weight:700; margin-bottom: 2rem;">⭐ StarConnect</div>
+                
+                <a class="nav-btn active" onclick="switchView('home', this)"><i class="fa-solid fa-house"></i> Home</a>
+                <a class="nav-btn" onclick="switchView('search', this)"><i class="fa-solid fa-magnifying-glass"></i> Search</a>
+                <a class="nav-btn" onclick="switchView('explore', this)"><i class="fa-regular fa-compass"></i> Explore</a>
+                <a class="nav-btn" onclick="switchView('messages', this)"><i class="fa-regular fa-paper-plane"></i> Messages</a>
+                <a class="nav-btn" onclick="switchView('notifications', this)"><i class="fa-regular fa-heart"></i> Notifications</a>
+                <a class="nav-btn" onclick="viewUserProfile(currentUser.username, currentUser.name, this)"><i class="fa-regular fa-user"></i> Profile</a>
+                
+                <div id="profile-widget" class="neon-border clickable-user" style="display: flex; align-items: center; gap: 10px; margin-top: 20px; padding: 10px; border-radius: 8px;" onclick="viewUserProfile(currentUser.username, currentUser.name, document.querySelectorAll('.nav-btn')[5])"></div>
+                <button type="button" class="btn-outline" onclick="location.reload()">Logout</button>
+            </div>
+        </aside>
+
+        <!-- CENTER CONTENT -->
+        <main class="main-content">
+            
+            <!-- 1. HOME VIEW -->
+            <div id="view-home" class="view-section active">
+                <div class="create-post-box neon-border">
+                    <div class="post-input-wrapper">
+                        <div class="avatar-placeholder" id="create-avatar">U</div>
+                        <textarea id="post-content" placeholder="Share Text, Photo, or Video..."></textarea>
+                    </div>
+                    <div id="preview-container" style="display:none; margin-top:10px;"></div>
+                    <div class="post-actions-row">
+                        <div style="display: flex; gap: 1rem;">
+                            <input type="file" id="media-upload" accept="image/*, video/*" style="display: none;" onchange="handleMediaSelect(event)">
+                            <button type="button" class="icon-btn" onclick="document.getElementById('media-upload').click()">
+                                <i class="fa-solid fa-photo-film"></i> Photo/Video
+                            </button>
+                        </div>
+                        <button type="button" class="neon-btn" id="post-btn" onclick="createPost()">Post</button>
+                    </div>
+                </div>
+                <div id="posts-feed"></div>
+            </div>
+
+            <!-- 2. SEARCH VIEW -->
+            <div id="view-search" class="view-section">
+                <h2 class="neon-text" style="margin-bottom: 20px;">Search</h2>
+                <input type="text" id="search-input" class="search-bar" placeholder="Search astronauts by name or username..." oninput="filterUsers()">
+                <div id="search-results-list"></div>
+            </div>
+
+            <!-- 3. EXPLORE VIEW -->
+            <div id="view-explore" class="view-section">
+                <h2 class="neon-text" style="margin-bottom: 20px;">Explore Matrix</h2>
+                <div class="empty-state">Trending posts will appear here.</div>
+            </div>
+
+            <!-- 4. MESSAGES VIEW -->
+            <div id="view-messages" class="view-section">
+                <h2 class="neon-text" style="margin-bottom: 20px;">Messages</h2>
+                <div id="chat-ui" style="display:none;" class="chat-container">
+                    <div class="chat-header" id="chat-partner-name">Chat</div>
+                    <div class="chat-box" id="chat-history"></div>
+                    <div class="chat-input-area">
+                        <input type="text" id="msg-input" class="insta-input" style="margin:0; flex:1;" placeholder="Type a message...">
+                        <button class="neon-btn" onclick="sendMessage()">Send</button>
+                    </div>
+                </div>
+                <div id="no-chat-selected" class="empty-state">Select an Astronaut from the right panel to chat.</div>
+            </div>
+
+            <!-- 5. NOTIFICATIONS VIEW -->
+            <div id="view-notifications" class="view-section">
+                <h2 class="neon-text" style="margin-bottom: 20px;">Notifications</h2>
+                <div class="empty-state">No new notifications.</div>
+            </div>
+
+            <!-- 6. DYNAMIC PROFILE VIEW -->
+            <div id="view-profile" class="view-section">
+                <div class="neon-border" style="padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; gap: 20px; align-items: center;">
+                        <div class="avatar-placeholder" id="profile-page-avatar" style="width: 80px; height: 80px; font-size: 2.5rem;">U</div>
+                        <div>
+                            <h2 id="profile-page-name" class="neon-text">Name</h2>
+                            <p id="profile-page-username" style="color: gray;">@username</p>
+                            <div class="profile-stats">
+                                <span id="prof-followers"><strong>0</strong> Followers</span>
+                                <span id="prof-following"><strong>0</strong> Following</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="profile-actions"></div>
+                </div>
+                <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;" id="profile-feed-title">Posts</h3>
+                <div id="profile-feed"></div>
+            </div>
+
+        </main>
+        
+        <!-- RIGHT SIDEBAR -->
+        <aside class="right-sidebar">
+            <div style="font-weight:600; color:var(--text-muted); margin-bottom: 1rem;">SUGGESTED ASTRONAUTS</div>
+            <div id="users-list"></div>
+        </aside>
+
+    </div>
+
+    <script>
+        let currentUser = null;
+        let selectedMedia = { type: null, data: null };
+        let currentActiveView = 'home'; 
+        let currentProfileTarget = null; 
+        let chatPartnerId = null;
+        let chatInterval = null;
+        let allOtherUsersGlobal = []; 
+
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
+            document.getElementById(`tab-${tab}`).classList.add('active');
+            document.getElementById(`${tab}-form`).classList.add('active');
+        }
+
+        function switchView(viewId, element) {
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if(element) element.classList.add('active');
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            
+            currentActiveView = viewId;
+            clearInterval(chatInterval); 
+            
+            if(viewId === 'home') loadPosts();
+            if(viewId === 'messages' && chatPartnerId) loadMessages();
+            if(viewId === 'search') renderSearchList(allOtherUsersGlobal); 
+        }
+
+        async function viewUserProfile(username, name, element = null) {
+            currentProfileTarget = username;
+            
+            document.getElementById('profile-page-avatar').innerText = name ? name[0].toUpperCase() : username[0].toUpperCase();
+            document.getElementById('profile-page-name').innerText = name || username;
+            document.getElementById('profile-page-username').innerText = `@${username}`;
+            document.getElementById('profile-feed-title').innerText = (username === currentUser.username) ? "My Posts" : `${name}'s Posts`;
+
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            if(username === currentUser.username && element) element.classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById('view-profile').classList.add('active');
+            
+            currentActiveView = 'profile';
+            await fetchProfileStats(username);
+            loadProfilePosts(username);
+        }
+
+        async function fetchProfileStats(targetUsername) {
+            const usersRes = await fetch('/api/users');
+            const users = await usersRes.json();
+            const targetUser = users.find(u => u.username === targetUsername);
+            
+            if(!targetUser) return;
+
+            const followsRes = await fetch('/api/follows');
+            const follows = await followsRes.json();
+            
+            const followersCount = follows.filter(f => f.following_id === targetUser.id).length;
+            const followingCount = follows.filter(f => f.follower_id === targetUser.id).length;
+            
+            document.getElementById('prof-followers').innerHTML = `<strong>${followersCount}</strong> Followers`;
+            document.getElementById('prof-following').innerHTML = `<strong>${followingCount}</strong> Following`;
+
+            const actionDiv = document.getElementById('profile-actions');
+            if(targetUser.id !== currentUser.id) {
+                actionDiv.innerHTML = `<button class="neon-btn" onclick="openChatWith(${targetUser.id}, '${targetUser.name}')">Message</button>`;
+            } else {
+                actionDiv.innerHTML = '';
+            }
+        }
+
+        function openChatWith(id, name) {
+            chatPartnerId = id;
+            document.getElementById('chat-partner-name').innerText = `Chat with ${name}`;
+            document.getElementById('no-chat-selected').style.display = 'none';
+            document.getElementById('chat-ui').style.display = 'flex';
+            
+            switchView('messages', document.querySelectorAll('.nav-btn')[3]);
+            loadMessages();
+            chatInterval = setInterval(loadMessages, 3000); 
+        }
+
+        async function loadMessages() {
+            if(!chatPartnerId) return;
+            const res = await fetch(`/api/messages/${currentUser.id}/${chatPartnerId}`);
+            const messages = await res.json();
+            const box = document.getElementById('chat-history');
+            
+            box.innerHTML = messages.map(m => {
+                const isMine = m.sender_id === currentUser.id;
+                return `<div class="msg-bubble ${isMine ? 'msg-sent' : 'msg-received'}">${m.content}</div>`;
+            }).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('msg-input');
+            if(!input.value.trim()) return;
+            
+            await fetch('/api/messages', { 
+                method: 'POST', 
+                headers: {'Content-Type':'application/json'}, 
+                body: JSON.stringify({ sender_id: currentUser.id, receiver_id: chatPartnerId, content: input.value }) 
+            });
+            input.value = '';
+            loadMessages();
+        }
+
+        async function register() {
+            const name = document.getElementById('reg-name').value;
+            const username = document.getElementById('reg-user').value;
+            const password = document.getElementById('reg-pass').value;
+            if(!name || !username || !password) return alert("Fill all fields");
+
+            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({name, username, password}) });
+            const data = await res.json();
+            if(data.error) alert(data.error);
+            else { currentUser = data; enterApp(); }
+        }
+
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            if(!username || !password) return alert("Fill credentials");
+
+            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({username, password}) });
+            const data = await res.json();
+            if(data.error) alert(data.error);
+            else { currentUser = data; enterApp(); }
+        }
+
+        function enterApp() {
+            document.getElementById('auth-page').style.display = 'none';
+            document.getElementById('main-app').style.display = 'block';
+            
+            const initial = currentUser.name[0].toUpperCase();
+            document.getElementById('create-avatar').innerText = initial;
+            document.getElementById('profile-widget').innerHTML = `
+                <div class="avatar-placeholder" style="width:35px;height:35px;">${initial}</div>
+                <div><div style="font-weight:600; color:#00ffff;">${currentUser.name}</div><div style="font-size:0.8rem; color:gray;">@${currentUser.username}</div></div>
+            `;
+            loadPosts();
+            loadUsers();
+        }
+
+        function handleMediaSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const isVideo = file.type.startsWith('video');
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                if(!isVideo) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 500; 
+                        let width = img.width;
+                        let height = img.height;
+                        
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                        canvas.width = width; canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.5); 
+                        selectedMedia = { type: 'image', data: compressedDataUrl };
+                        showPreview(compressedDataUrl, false);
+                    }
+                } else {
+                    if (file.size > 5000000) return alert("Video too large! Max size is 5MB.");
+                    selectedMedia = { type: 'video', data: e.target.result };
+                    showPreview(e.target.result, true);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function showPreview(url, isVideo) {
+            const preview = document.getElementById('preview-container');
+            preview.style.display = 'block';
+            if (isVideo) preview.innerHTML = `<video src="${url}" controls style="width:100%; border-radius:8px; border:1px solid #00ffff;"></video>`;
+            else preview.innerHTML = `<img src="${url}" style="width:100%; border-radius:8px; border:1px solid #00ffff;">`;
+        }
+
+        async function createPost() {
+            const content = document.getElementById('post-content').value;
+            if (!content && !selectedMedia.data) return alert("Add text or media!");
+
+            const btn = document.getElementById('post-btn');
+            btn.innerText = "Posting...";
+
+            try {
+                const response = await fetch('/api/posts', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ user_id: currentUser.id, content: content, mediaData: selectedMedia.data, mediaType: selectedMedia.type }) 
+                });
+
+                if(!response.ok) throw new Error("Failed");
+
+                document.getElementById('post-content').value = '';
+                document.getElementById('preview-container').style.display = 'none';
+                document.getElementById('media-upload').value = '';
+                selectedMedia = { type: null, data: null };
+                
+                if(currentActiveView === 'home') loadPosts();
+                if(currentActiveView === 'profile') loadProfilePosts(currentProfileTarget);
+            } catch(e) {
+                alert("Upload failed. Try a smaller text or image.");
+            }
+            btn.innerText = "Post";
+        }
+
+        function generatePostHTML(post) {
+            let mediaHtml = '';
+            if (post.mediaData) {
+                if (post.mediaType === 'video') mediaHtml = `<div class="media-container"><video src="${post.mediaData}" controls></video></div>`;
+                else mediaHtml = `<div class="media-container"><img src="${post.mediaData}"></div>`;
+            }
+            
+            // FIXED BUG: Now showing Name in neon color, and @username in smaller grey font.
+            const commentsHtml = post.comments.map(c => `
+                <div class="comment">
+                    <strong style="color:#00ffff;">${c.name}</strong> 
+                    <span style="font-size:0.75rem; color:gray;">@${c.username}</span>: ${c.content}
+                </div>
+            `).join('');
+            
+            return `
+                <div class="insta-post">
+                    <div class="post-header" onclick="viewUserProfile('${post.username}', '${post.name}')">
+                        <div class="avatar-placeholder" style="width:35px;height:35px;font-size:1rem;">${post.name[0].toUpperCase()}</div>
+                        <div><div class="post-author">${post.name}</div><span style="color:gray; font-size:0.8rem;">@${post.username}</span></div>
+                    </div>
+                    ${mediaHtml}
+                    <div class="post-actions">
+                        <i class="fa-solid fa-heart" onclick="toggleLike(${post.id})"></i>
+                        <i class="fa-regular fa-comment" onclick="document.getElementById('comment-${post.id}').focus()"></i>
+                        <i class="fa-solid fa-share-nodes" onclick="alert('Link Copied!')"></i>
+                    </div>
+                    <div class="likes-count">${post.likeCount} likes</div>
+                    ${post.content ? `<div style="padding: 0 1rem; margin-bottom: 0.5rem;">${post.content}</div>` : ''}
+                    <div class="comments-section">${commentsHtml}</div>
+                    <div class="add-comment">
+                        <input type="text" id="comment-${post.id}" placeholder="Write a comment...">
+                        <button type="button" onclick="addComment(${post.id})">Post</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadPosts() {
+            const res = await fetch('/api/posts');
+            const posts = await res.json();
+            const feed = document.getElementById('posts-feed');
+            if (posts.length === 0) return feed.innerHTML = '<div class="empty-state">The galaxy is quiet. Be the first to post!</div>';
+            feed.innerHTML = posts.map(generatePostHTML).join('');
+        }
+
+        async function loadProfilePosts(targetUsername) {
+            const res = await fetch('/api/posts');
+            const posts = await res.json();
+            const targetPosts = posts.filter(p => p.username === targetUsername);
+            const feed = document.getElementById('profile-feed');
+            
+            if (targetPosts.length === 0) {
+                const msg = targetUsername === currentUser.username ? "You haven't posted anything yet." : "This astronaut hasn't posted anything yet.";
+                feed.innerHTML = `<div class="empty-state">${msg}</div>`;
+                return;
+            }
+            feed.innerHTML = targetPosts.map(generatePostHTML).join('');
+        }
+
+        async function toggleLike(postId) {
+            await fetch(`/api/posts/${postId}/like`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: currentUser.id }) });
+            if(currentActiveView === 'home') loadPosts();
+            if(currentActiveView === 'profile') loadProfilePosts(currentProfileTarget);
+        }
+
+        async function addComment(postId) {
+            const input = document.getElementById(`comment-${postId}`);
+            if (!input.value) return;
+            await fetch(`/api/posts/${postId}/comment`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ user_id: currentUser.id, content: input.value }) });
+            input.value = '';
+            if(currentActiveView === 'home') loadPosts();
+            if(currentActiveView === 'profile') loadProfilePosts(currentProfileTarget);
+        }
+
+        async function loadUsers() {
+            const [usersRes, followsRes] = await Promise.all([fetch('/api/users'), fetch('/api/follows')]);
+            const users = await usersRes.json();
+            const follows = await followsRes.json();
+            
+            allOtherUsersGlobal = users.filter(u => u.id !== currentUser.id).map(user => {
+                user.isFollowing = follows.some(f => f.follower_id === currentUser.id && f.following_id === user.id);
+                return user;
+            });
+            
+            renderRightSidebar(allOtherUsersGlobal);
+            if(currentActiveView === 'search') renderSearchList(allOtherUsersGlobal);
+        }
+
+        function filterUsers() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allOtherUsersGlobal.filter(u => u.name.toLowerCase().includes(query) || u.username.toLowerCase().includes(query));
+            renderSearchList(filtered);
+        }
+
+        function renderSearchList(usersArray) {
+            const list = document.getElementById('search-results-list');
+            if(usersArray.length === 0) {
+                list.innerHTML = `<div class="empty-state">No astronauts found.</div>`;
+                return;
+            }
+            
+            list.innerHTML = usersArray.map(user => `
+                <div class="neon-border clickable-user" style="padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex:1;" onclick="viewUserProfile('${user.username}', '${user.name}')">
+                        <div class="avatar-placeholder" style="width:40px;height:40px;">${user.name[0].toUpperCase()}</div>
+                        <div style="font-size:0.95rem;"><strong>${user.name}</strong><br><span style="color:gray;">@${user.username}</span></div>
+                    </div>
+                    <button type="button" class="neon-btn" style="padding: 6px 15px; font-size: 0.85rem; background: ${user.isFollowing ? '#00ffff' : 'linear-gradient(90deg, #ff00ff, #00ffff)'}; color: black;" onclick="toggleFollow(${user.id}, this)">
+                        ${user.isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderRightSidebar(usersArray) {
+            const list = document.getElementById('users-list');
+            list.innerHTML = usersArray.slice(0, 5).map(user => `
+                <div class="neon-border clickable-user" style="padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div style="display: flex; gap: 10px; align-items: center; flex:1;" onclick="viewUserProfile('${user.username}', '${user.name}')">
+                        <div class="avatar-placeholder" style="width:35px;height:35px;">${user.name[0].toUpperCase()}</div>
+                        <div style="font-size:0.85rem;"><strong>${user.name}</strong><br><span style="color:gray;">@${user.username}</span></div>
+                    </div>
+                    <button type="button" class="neon-btn" style="padding: 4px 10px; font-size: 0.8rem; background: ${user.isFollowing ? '#00ffff' : 'linear-gradient(90deg, #ff00ff, #00ffff)'}; color: black;" onclick="toggleFollow(${user.id}, this)">
+                        ${user.isFollowing ? 'Following' : 'Follow'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function toggleFollow(userId, btnElement) {
+            const res = await fetch(`/api/users/${userId}/follow`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ follower_id: currentUser.id }) });
+            const data = await res.json();
+            
+            if(data.followed) {
+                btnElement.innerText = "Following";
+                btnElement.style.background = "#00ffff";
+            } else {
+                btnElement.innerText = "Follow";
+                btnElement.style.background = "linear-gradient(90deg, #ff00ff, #00ffff)";
+            }
+            loadUsers(); 
+            if(currentActiveView === 'profile') fetchProfileStats(currentProfileTarget);
+        }
+    </script>
+</body>
+</html>
